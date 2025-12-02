@@ -1,0 +1,117 @@
+---
+title: "EDA"
+format: html
+editor: visual
+---
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+```
+
+
+### Introduction
+
+The purpose of this exploratory data analysis (EDA) is to develop a thorough understanding of the Diabetes Health Indicators (BRFSS 2015) dataset before fitting any predictive models. Understanding how the data is stored, validating variable types and ranges, checking for missingness, examining distributions, and exploring relationships between variables—this EDA identifies meaningful patterns and potential predictors of diabetes. By investigating both univariate and multivariate summaries, we aim to uncover which health behaviors, demographic factors, and clinical indicators are most strongly associated with diabetes status.
+
+The ultimate goal of modeling is to build an accurate and interpretable statistical or machine learning model that can predict whether an individual has diabetes based on their health and lifestyle indicators. Insights gained from the EDA will guide variable selection, appropriate preprocessing steps, and model choice, ensuring that the final predictive model is both reliable and grounded in a clear understanding of the underlying data structure.
+```{r}
+Diabetes_df <- read_csv("diabetes_binary_health_indicators_BRFSS2015.csv")
+```
+
+```{r}
+str(Diabetes_df)
+```
+After looking at the data there are 253,680 observations with 22 variables. The 22 variables include Binary catagrical variables (HighBP, smoker,Fruits..), Ordinal catagorical variables (age_group, education, income) and continuous varibales (BMI, phys/mental health days..).
+
+To make the EDA more interpretable, columns are changed to factors to have more meaningful labels. 
+```{r}
+library(tidyverse)
+
+Diabetes_df <- Diabetes_df |>
+mutate(
+Diabetes_binary = factor(Diabetes_binary, levels = c(0, 1), labels = c("No Diabetes", "Prediabetes/Diabetes")),
+HighBP = factor(HighBP, labels = c("No High BP", "High BP")),
+HighChol = factor(HighChol, labels = c("No High Chol", "High Chol")),
+CholCheck = factor(CholCheck, labels = c("No Check", "Check")),
+Smoker = factor(Smoker, labels = c("Non-Smoker", "Smoker")),
+Stroke = factor(Stroke, labels = c("No Stroke", "Stroke")),
+HeartDiseaseorAttack = factor(HeartDiseaseorAttack, labels = c("No", "Yes")),
+DiffWalk = factor(DiffWalk, labels = c("No Difficulty", "Difficulty")),
+PhysActivity = factor(PhysActivity, labels = c("No Activity", "Activity")),
+Sex = factor(Sex, labels = c("Female", "Male")),
+Age = factor(Age),
+Education = factor(Education),
+Income = factor(Income)
+)
+glimpse(Diabetes_df)
+
+```
+
+```{r}
+psych::describe(Diabetes_df)
+```
+Looking at these the minumums and maximums of our dataset look correct as well as the medians and sd for our numeric variables. 
+
+Now determine if there are a lot of missng values/rate of missingness for certain variables.
+```{r}
+colSums(is.na(Diabetes_df))
+
+```
+There is no missing data so there is no need for futher invesitgation here. 
+
+Check the summary of the response variable 
+```{r}
+Diabetes_df |>
+count(Diabetes_binary) |>
+mutate(prop = n / sum(n))
+
+```
+Looking at the summary of the response variable we can see that there are far more observations of no diabetes than of prediabetes. This is important to keep in mind as we move to modeling. We can get 86% accuracy for our models simply by predicting no diabetes for the entire data set. We can tackle this by using class weights or changing our performance metric. We will follow this up later. 
+
+Lets look at a few of our distributions.
+
+```{r}
+library(ggplot2)
+#look at distribution of BMI
+ggplot(Diabetes_df, aes(BMI)) +
+geom_histogram(bins = 40, fill = "#2c7fb8", alpha = 0.7) +
+labs(title = "Distribution of BMI", x = "BMI", y = "Count")
+
+#look at distribution of Age
+ggplot(Diabetes_df, aes(Age)) +
+geom_bar(fill="#df65b0") +
+labs(title="Age Group Distribution", x="Age Group", y="Count")
+
+```
+```{r}
+ggplot(Diabetes_df, aes(x = BMI, fill = Diabetes_binary)) +
+geom_density(alpha = 0.4) +
+labs(
+title = "BMI Distribution by Diabetes Status",
+x = "BMI", y = "Density",
+fill = "Diabetes Status"
+)
+
+```
+Both the No Diabetes and Prediabetes/Diabetes have similar distributions however, the blue curve is shifted slightly to the right so we can determine that there people with diabetes or prediabetes have a higher BMI on average. 
+```{r}
+# High Blood Pressure vs Diabetes
+table_highbp <- Diabetes_df |>
+  count(Diabetes_binary, HighBP) |>
+  group_by(Diabetes_binary) |>
+  mutate(prop = n / sum(n)) |>
+  ungroup()
+table_highbp
+```
+```{r}
+Diabetes_df |>
+  count(HighChol, Diabetes_binary) |>
+  pivot_wider(names_from = Diabetes_binary, values_from = n) |>
+  mutate(Total = `No Diabetes` + `Prediabetes/Diabetes`,
+         `% with Diabetes` = round(`Prediabetes/Diabetes` / Total * 100, 2))
+
+```
+You can see from the above summaries as we expect high blood pressure and high cholesterol increase the percentages of prediabetes/diabetes. 
+
+
