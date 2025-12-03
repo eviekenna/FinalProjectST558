@@ -531,6 +531,8 @@ cat("This model is ready for deployment\n")
 
 I successfully built and compared two tree-based models for predicting diabetes status. The random forest outperformed the single classification tree, achieving lower log-loss and demonstrating better probability calibration. The final model is trained on the full dataset and ready for deployment.
 
+```
+
 ---
 
 **End of Modeling Document**
