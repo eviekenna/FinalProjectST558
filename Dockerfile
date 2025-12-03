@@ -1,18 +1,33 @@
 FROM rocker/tidyverse:latest
 
-# Install system dependencies that might be needed
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     libcurl4-openssl-dev \
     libssl-dev \
-    libxml2-dev
+    libxml2-dev \
+    libfontconfig1-dev \
+    libharfbuzz-dev \
+    libfribidi-dev \
+    libfreetype6-dev \
+    libpng-dev \
+    libtiff5-dev \
+    libjpeg-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install R packages with error checking
-RUN R -e "install.packages('plumber', repos='https://cloud.r-project.org/', dependencies=TRUE)"
-RUN R -e "install.packages('tidymodels', repos='https://cloud.r-project.org/', dependencies=TRUE)"
-RUN R -e "install.packages('ranger', repos='https://cloud.r-project.org/', dependencies=TRUE)"
+# Install plumber first (it's simpler and helps diagnose issues)
+RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/')); \
+    install.packages('plumber', dependencies = TRUE); \
+    if (!require('plumber')) stop('plumber failed to install')"
 
-# Verify packages installed correctly
-RUN R -e "library(plumber); library(tidymodels); library(ranger)"
+# Install tidymodels
+RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/')); \
+    install.packages('tidymodels', dependencies = TRUE); \
+    if (!require('tidymodels')) stop('tidymodels failed to install')"
+
+# Install ranger
+RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/')); \
+    install.packages('ranger', dependencies = TRUE); \
+    if (!require('ranger')) stop('ranger failed to install')"
 
 # Copy necessary files into the container
 COPY API.R /API.R
