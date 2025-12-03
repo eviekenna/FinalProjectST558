@@ -114,4 +114,4 @@ Diabetes_df |>
 ```
 You can see from the above summaries as we expect high blood pressure and high cholesterol increase the percentages of prediabetes/diabetes. 
 
-
+[Click here for the Modeling Page](Modeling.html)
