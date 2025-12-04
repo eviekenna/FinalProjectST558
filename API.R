@@ -72,7 +72,7 @@ final_model <- rand_forest(
   set_engine("ranger") %>%
   set_mode("classification")
 
-# Create recipe (EXACT same as your modeling file)
+# Create recipe 
 diabetes_recipe <- recipe(Diabetes_binary ~ HighBP + HighChol + BMI + 
                             Age + GenHlth + PhysActivity + 
                             HeartDiseaseorAttack + Stroke + DiffWalk + Sex, 
@@ -158,9 +158,9 @@ function(HighBP = 0, HighChol = 0, BMI = 28, Age = "9",
 #* @get /info
 function() {
   return(list(
-    name = "YOUR NAME HERE",
+    name = "Evie Kenna",
     project = "ST 558 Final Project - Diabetes Prediction",
-    github_pages_url = "https://yourusername.github.io/your-repo-name/",
+    github_pages_url = "https://eviekenna.github.io/FinalProjectST558/",
     model_info = list(
       model_type = "Random Forest",
       best_hyperparameters = list(
