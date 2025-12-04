@@ -1,6 +1,6 @@
 ---
 title: "Modeling: Predicting Diabetes from Health Indicators"
-author: "[Your Name]"
+author: "Evie Kenna"
 format:
   html:
     toc: true
